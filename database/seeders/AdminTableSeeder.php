@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enumeration\PermissionType;
 use App\Models\Permission;
 use App\Models\UserPermission;
 use Illuminate\Database\Seeder;
@@ -28,13 +29,13 @@ class AdminTableSeeder extends Seeder
             'updated_at' => now()
         ]);
 
-        $permissions = Permission::all();
+        $permissions = Permission::where('type', PermissionType::$Admin)->get();
 
-        foreach ($permissions as $perminsion){
+        foreach ($permissions as $permission){
             UserPermission::create([
-                'module' => $perminsion->module,
+                'module' => $permission->module,
                 'user_id' => 1,
-                'permission_id' => $perminsion->id,
+                'permission_id' => $permission->id,
             ]);
         }
     }

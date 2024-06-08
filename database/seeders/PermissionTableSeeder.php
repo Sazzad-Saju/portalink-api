@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enumeration\PermissionType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,9 @@ class PermissionTableSeeder extends Seeder
     {
         DB::table('permissions')->truncate();
         $modules = array(
-            array('name' => 'settings', 'module' => 'settings')
+            array('name' => 'settings', 'module' => 'settings', 'type' => PermissionType::$Admin),
+            array('name' => 'customer', 'module' => 'customer', 'type' => PermissionType::$Admin),
+            array('name' => 'profile', 'module' => 'profile', 'type' => PermissionType::$Customer),
         );
 
         DB::table('permissions')->insert($modules);

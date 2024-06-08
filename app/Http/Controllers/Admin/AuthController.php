@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enumeration\PermissionType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AuthResource;
 use App\Models\Admin;
+use App\Models\Permission;
 use App\Models\UserPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -58,5 +60,9 @@ class AuthController extends Controller
     public function getAuthUserPermission()
     {
         return UserPermission::where('user_id',Auth::guard('admin')->user()->id)->get();
+    }
+    public function getCustomerPermissions()
+    {
+        return Permission::where('type', PermissionType::$Customer)->get();
     }
 }
