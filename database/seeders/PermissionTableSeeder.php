@@ -18,7 +18,7 @@ class PermissionTableSeeder extends Seeder
         $modules = array(
             array('name' => 'settings', 'module' => 'settings', 'type' => PermissionType::$Admin),
             array('name' => 'customer', 'module' => 'customer', 'type' => PermissionType::$Admin),
-            array('name' => 'profile', 'module' => 'profile', 'type' => PermissionType::$Customer),
+            array('name' => 'user', 'module' => 'user', 'type' => PermissionType::$Customer),
         );
 
         DB::table('permissions')->insert($modules);

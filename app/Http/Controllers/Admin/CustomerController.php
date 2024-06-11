@@ -11,6 +11,7 @@ use App\Models\UserPermission;
 use App\Rules\UniqueEmail;
 use App\Rules\UniqueUsername;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CustomerController extends Controller
@@ -146,6 +147,8 @@ class CustomerController extends Controller
             'password' => 'nullable|string|min:6',
         ]);
         $admin = Admin::findOrFail($id);
+        $authUserId = Auth::guard('admin')->user()->user_id;
+        $isAdmin = $authUserId ? false : true;
         DB::beginTransaction();
         try {
             if ($admin) {
@@ -156,7 +159,7 @@ class CustomerController extends Controller
                     'password' => $request->password ? bcrypt($request->password) : $admin->password,
                     'username' => $request->username,
                     'user_id' => $admin->user_id,
-                    'status' => $request->status,
+                    'status' => $isAdmin ? $request->status : $admin->status,
                 ]);
                 
                 $customer = Customer::findOrFail($admin->user_id);
@@ -167,7 +170,7 @@ class CustomerController extends Controller
                     'last_name' => $admin->last_name,
                     'password' => $request->password ? bcrypt($request->password) : $admin->password,
                     'status' => $admin->status,
-                    'type' => $request->type,
+                    'type' => $isAdmin ? $request->type : $customer->type,
                 ]);
 
                 UserPermission::where('user_id', $admin->id)->delete();
