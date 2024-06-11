@@ -24,10 +24,12 @@ class CustomerResource extends JsonResource
             'username' => $this->username,
             'email' => $this->email,
             'status' => $this->status,
+            'typeVal' => $this->customer ? $this->customer->type : null,
             'type' => $this->customer ? CustomerTypeText::$TYPE[$this->customer->type] : null,
             'url' => $this->customer ? CustomerUrlTypeText::$TYPE[$this->customer->type] . '/'. $this->username : null,
             'last_login' => $this->last_login ? $this->last_login->format('Y-m-d h:i:s A') : '',
             'created_at' => $this->created_at->format('Y-m-d h:i:s A'),
+            'permissions'=> $this->permissions ? $this->permissions : null,
         ];
     }
 }

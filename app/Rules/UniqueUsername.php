@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\DB;
 
 class UniqueUsername implements ValidationRule
 {
+    protected $ignoreId; 
+    public function __construct($ignoreId = null)
+    {
+        $this->ignoreId = $ignoreId;
+    }
+    
     /**
      * Run the validation rule.
      *
@@ -15,10 +21,19 @@ class UniqueUsername implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $customerExists = DB::table('customers')->where('username', $value)->exists();
-        $adminExists = DB::table('admins')->where('username', $value)->exists();
+        $adminExists = DB::table('admins')
+                        ->where('username', $value)
+                        ->when($this->ignoreId, function ($query) {
+                            $query->where('id', '!=', $this->ignoreId);
+                        })
+                        ->exists();
+                        
+        $customerExists = DB::table('customers')
+                            ->where('username', $value)
+                            ->exists();
         
-        if ($customerExists || $adminExists) {
+        
+        if ($customerExists && $adminExists) {
             $fail('The ' . $attribute . ' must be unique!');
         }
     }
