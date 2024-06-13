@@ -31,7 +31,7 @@ class Customer extends Model
     protected static function booted()
     {
         static::updating(function ($customer) {
-            if ($customer->pro_pic != $customer->getOriginal('pro_pic')) {
+            if ($customer->getOriginal('pro_pic') && $customer->pro_pic != $customer->getOriginal('pro_pic')) {
                 if (Storage::exists($customer->getOriginal('pro_pic')))
                     Storage::delete($customer->getOriginal('pro_pic'));
             }

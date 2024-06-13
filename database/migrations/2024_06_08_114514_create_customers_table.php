@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('password');
             $table->string('pro_pic')->nullable();
-            $table->string('birth_date')->nullable();
+            $table->date('birth_date')->nullable();
             $table->boolean('status')->default(0);
             $table->integer('type')->nullable();
             $table->timestamps();

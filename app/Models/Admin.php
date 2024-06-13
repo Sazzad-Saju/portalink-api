@@ -46,4 +46,9 @@ class Admin extends Model
     {
         return $this->belongsTo(Customer::class, 'user_id');
     }
+    
+    public function address()
+    {
+        return $this->hasOne(Address::class, 'user_id', 'user_id');
+    }
 }

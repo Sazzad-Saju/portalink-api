@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CountryResource;
+use App\Models\Country;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -87,5 +89,10 @@ class SettingController extends Controller
         Storage::put($logoStorePath, $makePath);
 
         return $logoStorePath;
+    }
+    public function getCountries()
+    {
+        $countries = Country::orderBy('name')->get();
+        return CountryResource::collection($countries);
     }
 }

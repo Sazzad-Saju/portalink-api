@@ -20,4 +20,8 @@ Route::middleware('auth:admin')->group(function () {
     //customer
     Route::apiResource('customers', CustomerController::class);
     Route::post('/customer/status/{id}', [CustomerController::class, 'updateActivationStatus']);
+    Route::post('/customer/update-additional',[CustomerController::class, 'updateAdditional']);
+    
+    //countries
+    Route::get('/countries', [SettingController::class, 'getCountries']);
 });

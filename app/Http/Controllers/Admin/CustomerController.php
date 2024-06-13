@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CustomerResource;
+use App\Models\Address;
 use App\Models\Admin;
 use App\Models\Customer;
 use App\Models\Permission;
@@ -122,7 +123,7 @@ class CustomerController extends Controller
     public function show(Request $request, $id)
     {
         $admin = Admin::where('id', $id)->first();
-        $admin->load('permissions', 'customer');
+        $admin->load('permissions', 'customer', 'address');
         return new CustomerResource($admin);
     }
 
@@ -172,18 +173,20 @@ class CustomerController extends Controller
                     'status' => $admin->status,
                     'type' => $isAdmin ? $request->type : $customer->type,
                 ]);
+                
+                if($isAdmin){
+                    UserPermission::where('user_id', $admin->id)->delete();
 
-                UserPermission::where('user_id', $admin->id)->delete();
-
-                foreach ($request->permissions as $permission) {
-                    if ($permission['status']) {
-                        $permit = Permission::find($permission['id']);
-                        if ($permit) {
-                            UserPermission::create([
-                                'module' => $permit->module,
-                                'user_id' => $admin->id,
-                                'permission_id' => $permit->id,
-                            ]);
+                    foreach ($request->permissions as $permission) {
+                        if ($permission['status']) {
+                            $permit = Permission::find($permission['id']);
+                            if ($permit) {
+                                UserPermission::create([
+                                    'module' => $permit->module,
+                                    'user_id' => $admin->id,
+                                    'permission_id' => $permit->id,
+                                ]);
+                            }
                         }
                     }
                 }
@@ -224,4 +227,69 @@ class CustomerController extends Controller
         
         return response()->json(['success' => true, 'message' => 'Customer updated successfully!'], 200);
     }
+    public function updateAdditional(Request $request)
+    {
+        $request->merge(['dob' => json_decode($request->dob), true]);
+        $request->validate([
+            'user_id' => 'required',
+            'phone' => 'required|string|max:255',
+            'dob' => 'nullable|date|before:today',
+            'address' => 'required|string',
+            'city' => 'nullable|string|max:255',
+            'state' => 'required|string',
+            'country_id' => 'required|integer|exists:countries,id',
+            'postal_code' => 'nullable|string',
+            'plus_code' => 'nullable|string',
+            'pro_pic' => 'nullable|file|mimes:jpg,jpeg,png,gif|max:2048'
+        ]);
+        
+        $pro_pic = null;
+        if($request->hasFile('pro_pic')) {
+            $pro_pic = $request->file('pro_pic')->store('customer/pro_pic');
+        }
+        
+        DB::beginTransaction();
+        
+        try{
+            $customer = Customer::where('id', $request->user_id)->first();
+            if($customer){
+                
+                $customer->pro_pic = $pro_pic;
+                $customer->save();
+                $customer->birth_date = $request->dob;
+                
+                
+                $address = Address::where('user_id', $customer->id)->first();
+                if($address){
+                    $address->update([
+                        'phone' => $request->phone,
+                        'address' => $request->address,
+                        'city' => $request->city,
+                        'state' => $request->state,
+                        'country_id' => $request->country_id,
+                        'post_code' => $request->postal_code,
+                        'plus_code' => $request->plus_code
+                    ]);
+                }else{
+                    Address::create([
+                        'user_id' => $request->user_id,
+                        'phone' => $request->phone,
+                        'address' => $request->address,
+                        'city' => $request->city,
+                        'state' => $request->state,
+                        'country_id' => $request->country_id,
+                        'post_code' => $request->postal_code,
+                        'plus_code' => $request->plus_code
+                    ]);
+                }
+            }
+        }catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+        }
+        DB::commit();
+        
+        return new CustomerResource($customer);
+    }
+        
 }

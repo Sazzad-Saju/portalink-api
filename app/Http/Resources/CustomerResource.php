@@ -6,6 +6,7 @@ use App\Enumeration\CustomerTypeText;
 use App\Enumeration\CustomerUrlTypeText;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerResource extends JsonResource
 {
@@ -23,6 +24,9 @@ class CustomerResource extends JsonResource
             'name' => $this->first_name .' '. $this->last_name,
             'username' => $this->username,
             'email' => $this->email,
+            'pro_pic' => $this->customer ? Storage::url($this->customer->pro_pic) : '',
+            'dob' => $this->birth_date,
+            'address' => new AddressResource($this->whenLoaded('address')),
             'status' => $this->status,
             'typeVal' => $this->customer ? $this->customer->type : null,
             'type' => $this->customer ? CustomerTypeText::$TYPE[$this->customer->type] : null,
